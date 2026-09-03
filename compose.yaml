@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: cloud-lms-postgres
+    environment:
+      POSTGRES_DB: saas_lms
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: LMS@2026
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    container_name: cloud-lms-backend
+    ports:
+      - "5000:5000"
+    environment:
+      PORT: 5000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: saas_lms
+      DB_USER: postgres
+      DB_PASSWORD: LMS@2026
+      JWT_SECRET: my_lms_secret_key_2026
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: cloud-lms-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
